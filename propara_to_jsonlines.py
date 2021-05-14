@@ -2,6 +2,7 @@ import argparse
 import json
 from transformers import BertTokenizerFast
 from bert.tokenization import BasicTokenizer
+from tqdm import tqdm
 
 
 def parse_args():
@@ -30,7 +31,7 @@ def process_data(data_file, output_file, vocab_file):
 
     output_jsons = []
     # Format as jsonlines & tokenize
-    for para in data:
+    for para in tqdm(data):
         output = {}
         paragraph_text = " ".join(para['sentence_texts'])
 
@@ -59,16 +60,17 @@ def process_data(data_file, output_file, vocab_file):
         # Add on last subtoken for SEP
         subtoken_map += [subtoken_map[-1]]
 
-        output['speakers'] = ['[SPL]'] + ['-'] * \
-            (len(paragraph_tokens) - 2) + ['[SPL]']
-        output['sentences'] = paragraph_tokens
+        output['para_id'] = para['para_id']
+        output['speakers'] = [['[SPL]'] + ['-'] * \
+            (len(paragraph_tokens) - 2) + ['[SPL]']]
+        output['sentences'] = [paragraph_tokens]
         output['sentence_map'] = sentence_map
         output['clusters'] = [[]]
         output['subtoken_map'] = subtoken_map
         output['token_char_spans'] = token_character_offsets
         output['original_text'] = paragraph_text
+        output['doc_key'] = "wb"
 
-        print(list(zip(paragraph_tokens, subtoken_map, sentence_map)))
         # Test, if we know we have a mention on tokens 2-8
         # how do we translate that to a span in the original sentence?
         output_jsons.append(output)

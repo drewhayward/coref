@@ -6,6 +6,7 @@ import sys
 import json
 
 import tensorflow as tf
+from tqdm import tqdm
 import util
 
 if __name__ == "__main__":
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
     with open(output_filename, "w") as output_file:
       with open(input_filename) as input_file:
-        for example_num, line in enumerate(input_file.readlines()):
+        for example_num, line in tqdm(enumerate(input_file.readlines())):
           example = json.loads(line)
           tensorized_example = model.tensorize_example(example, is_training=False)
           feed_dict = {i:t for i,t in zip(model.input_tensors, tensorized_example)}
